@@ -1,6 +1,8 @@
 # Telos
 
-![Typical matrix sparsity patterns for solving PDEs](pde.png)
+![](pde.png)
+
+*Figure: Typical matrix sparsity patterns in solving PDEs*
 
 # Introduction
 Partial Differential Equations (PDEs) are the backbone of numerous scientific problems. Their solutions typically require numerical methods, which convert these equations into large, sparse systems of linear equations. These systems, solved with iterative methods, reveal structured sparsity patterns when derived from stencil-based numerical schemes. In preconditioned solvers, the sparse triangular solve procedure, SpTRSV, usually dominates the entire execution due to its loop-carried dependencies. Optimizing SpTRSV requires extracting parallelism from dependent computations. However, prior works fail to achieve both data locality and high parallelism, resulting in suboptimal performance.  
@@ -30,4 +32,3 @@ python exp.py [data_csv_path] [spmv | sptrsv | ...] [max_procs]
 # Publication
 + **Telos: A Dataflow Accelerator for Sparse Triangular Solver of Partial Differential Equations**.  
 Xiaochen Hao, Hao Luo, Chu Wang, Chao Yang, Yun Liang. ISCA, 2025. 
-
