@@ -1,0 +1,35 @@
+{
+    "StencilType": 0,
+    "NumDims": 2,
+    "Freq": 0.4,
+    "ScheScheme": "wavefront",
+    "Arch": {
+        "NumPEs": [8, 8],
+        "VecLanes": 4,
+        "HaloLanes": [16, 16, 16, 16]
+    },
+    "Mem": {
+        "Depth": 64,
+        "DRAM_BW": 460
+    },
+    "SRAM": {
+        "DomainMtx_BW": 512,
+        "DomainVec_BW": 512,
+        "HaloVec_BW": 512
+    },
+    "Delay": {
+        "Mul": 1,
+        "Div": 2,
+        "Add": 1
+    },
+    "Energy": {
+        "DRAM_read_per_data": 100.56,
+        "DRAM_write_per_data": 133.50,
+        "DomainVectorBuffer_per_data": 16.15,
+        "DomainSpMatBuffer_per_data": 28.56,
+        "HaloVectorBuffer_per_data": 8.27,
+        "Add": 0.79,
+        "Mul": 5.63,
+        "Div": 50.71
+    }
+}
