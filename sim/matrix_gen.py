@@ -1,8 +1,8 @@
-# 读入命令行参数, 4-5个数字, 代表stencil类型, 维数, x, y, z
+# Read command line arguments, 4-5 numbers representing stencil type, dimension, x, y, z
 import numpy as np
 import math
 import random
-from stencil import get_affine_stencil_points, get_stencil_points
+from .stencil import get_affine_stencil_points, get_stencil_points
 
 def get_linear_system_sptrsv(dim, stencil_type, size):
     grid_size = math.prod(size)
@@ -38,7 +38,7 @@ def get_linear_system_sptrsv(dim, stencil_type, size):
                         rand_num = -random.randint(1, 10)
                         matrix_value[idx_new][l] = rand_num
                         sum += rand_num
-                        
+
                 matrix_diag[idx] = -sum + 1.0
 
     data = { "size": (x, y, z), "A": matrix_value, "diag_a": matrix_diag, "b": right_hand_side }

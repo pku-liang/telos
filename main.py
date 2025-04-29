@@ -3,15 +3,15 @@ import simpy
 import sys
 import os
 from loguru import logger
-from MtxGen import get_linear_system_sptrsv, get_linear_system_spmv
-from PreprocessSpTRSV import preprocess_sptrsv
-from PreprocessSpMV import preprocess_spmv
-from Accelerator import *
+from sim.matrix_gen import get_linear_system_sptrsv, get_linear_system_spmv
+from sim.PreprocessSpTRSV import preprocess_sptrsv
+from sim.PreprocessSpMV import preprocess_spmv
+from sim.Accelerator import *
 import time
 
 def set_allocate_DRAM_BW(cfg):
     clock_freq = cfg["Freq"]
-    dram_bw = cfg["Mem"]["DRAM_BW"] / (clock_freq * cfg["DataSize"])
+    dram_bw = cfg["Mem"]["DRAM_BW"] / (clock_freq * cfg["DataWidth"])
     stencil_type = cfg["StencilType"]
     dims = cfg["NumDims"]
     pe_x = cfg["Arch"]["NumPEs"][0]
@@ -87,7 +87,7 @@ def dump_debug_log():
 def run_sim(config, size, test_flag):
     stencil = config["StencilType"]
     dims = config["NumDims"]
-    print(f"Current Test: Compute Type={config["ComputeType"]}, Size={size}, Stencil Type={stencil}")
+    print(f"Current Test: Compute Type={config['ComputeType']}, Size={size}, Stencil Type={stencil}")
     set_allocate_DRAM_BW(config)
 
     if config["ComputeType"] == "sptrsv": # sptrsv
@@ -108,7 +108,7 @@ def run_sim(config, size, test_flag):
         data = preprocess_spmv(data, config["Arch"]["NumPEs"][0], config["Arch"]["NumPEs"][1], stencil, dims)
         print(f"Data preprocessing finished, used time: {time.time() - start_time:.2f}s")
     else:
-        raise RuntimeError(f"Unsupported compute type {config["ComputeType"]}\nSupported compute type: sptrsv, spmv")
+        raise RuntimeError(f"Unsupported compute type {config['ComputeType']}\nSupported compute type: sptrsv, spmv")
 
     env = simpy.Environment()
     acc = Accelerator(env, config, data, progressbar=True)
@@ -151,5 +151,3 @@ if __name__ == "__main__":
         dump_debug_log()
 
     run_sim(config, size, False)
-
-

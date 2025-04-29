@@ -1,6 +1,6 @@
 import simpy
 from loguru import logger
-from stencil import get_id2stage, get_stencil_points, get_stage_lanes, get_num_stencil_points, get_affine_stencil_points
+from .stencil import get_id2stage, get_stencil_points, get_stage_lanes, get_num_stencil_points, get_affine_stencil_points
 
 class PEPorts:
     def __init__(self, env, compute_type):
@@ -195,7 +195,7 @@ class PE:
 
     def VectorUnit(self):
         # schedule multiply index
-        # 按照critical path长度降序排列
+        # Sorted in descending order of critical path length
         sche_seq_3d = [
             [0, 1, 2],
             [0, 3, 1, 4, 2, 5],
@@ -257,12 +257,14 @@ class PE:
                     cur_ijk_index = self.shift_x[stage_id][3]
                     z_target = z_offset + cur_z
 
-                    # 前提：目标z坐标范围不超出整体边界
+                    # Prerequisite: The target z-coordinate range does not exceed the overall boundary
                     if x_valid and z_target >= 0 and z_target < self.data.dim0_extent and \
                         (z_offset - stage_id <= 0 or z_target % z != 0):
-                        # 对输出到R_k端口特判(满足z_offset > stage_id), 若z_target % z == 0表明target与当前不在同一个tile则不输出，避免阻塞R_k
-                        # 这是因为R_k在新一个tile开始时不会取端口中的数
-                        # 对于其他端口，若目标ijk超出中间的tile边界，则A对应元素为0，输出结果为0，不会影响计算后的值，不需要判断
+                        # Special case for output to the R_k port (satisfying z_offset > stage_id). If z_target % z == 0,
+                        # it indicates that the target and the current are not in the same tile, so do not output to avoid
+                        # blocking the R_k port. This is because R_k does not fetch numbers from the port when a new tile starts.
+                        # For other ports, if the target ijk exceeds the intermediate tile boundary, the corresponding A element
+                        # will be 0, and the output result will be 0. This will not affect the computed value, so no check is needed.
                         target_index = tuple(a - b for a, b in zip(cur_ijk_index, self.index_offset[sche_id]))
                         logger.debug(f"(Cycle {self.env.now}) PE({self.i}, {self.j}) VectorUnit: waiting for port[{sche_id}] to be empty")
                         yield self.vec_results[sche_id].put((vec_x[sche_id] * vec_A[sche_id], target_index))
@@ -277,7 +279,7 @@ class PE:
 
     def VectorUnit_SpMV(self):
         # schedule multiply index
-        # 按照critical path长度降序排列
+        # Sorted in descending order of critical path length
         sche_seq_3d = [
             [0, 3, 6, 1, 2, 4, 5],
             [0, 1, 11, 12, 6, 2, 3, 4, 5, 7, 8, 9, 10],
@@ -333,7 +335,7 @@ class PE:
                     cur_ijk_index = self.shift_x[stage_id][3]
                     z_target = z_offset + cur_z
 
-                    # 前提：目标z坐标范围不超出整体边界
+                    # Prerequisite: The target z-coordinate range does not exceed the overall boundary
                     if z_target >= 0 and z_target < self.data.dim0_extent:
                         target_index = tuple(a + b for a, b in zip(cur_ijk_index, self.index_offset[sche_id]))
                         logger.debug(f"(Cycle {self.env.now}) PE({self.i}, {self.j}) VectorUnit: waiting for port[{sche_id}] to be empty")
@@ -518,7 +520,7 @@ class PE:
                     ]
 
     def adder(self, inputs, output):
-        # 最多为4输入adder
+        # Maximum of 4-input adder
         assert(len(inputs) <= 4)
         output_port, output_name = output
         while True:
@@ -686,5 +688,3 @@ class PEArray:
                 else:
                     yield self.boundaries[1][i].agg_out.put(agg_out_j)
                     logger.trace(f"(Cycle {self.env.now}) PEArray: pass from PE({i}, {j}) to HEU (1, {i}) agg_out through agg_out_j, target_ijk={target_index}")
-
-

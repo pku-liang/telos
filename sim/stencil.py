@@ -1,4 +1,4 @@
-# 返回每个stage包含的通道数
+# Returns the number of channels contained in each stage
 def get_stage_lanes(dims, stencil_type, compute_type):
     if compute_type == "sptrsv":
         stage_lanes_3d = [[3], [3, 3], [3, 2, 1], [3, 2, 3, 1, 2, 1, 1]]
@@ -9,7 +9,7 @@ def get_stage_lanes(dims, stencil_type, compute_type):
     return stage_lanes_3d[stencil_type] if dims == 3 else stage_lanes_2d[stencil_type]
 
 
-# 返回通道ID对应的stage ID
+# Returns the stage ID corresponding to the channel ID
 def get_id2stage(dims, stencil_type, compute_type):
     if compute_type == "sptrsv":
         id2stage = []
@@ -34,10 +34,10 @@ def get_id2stage(dims, stencil_type, compute_type):
 def get_stages(dims, stencil_type, compute_type):
     return len(get_stage_lanes(dims, stencil_type, compute_type))
 
-# 返回position索引的halo_points个数的list
+# Returns a list of the number of halo points for each position index
 def get_num_halo_points(stencil_type, tile_x, tile_y, compute_type):
     if compute_type == "sptrsv":
-        if stencil_type == 0: 
+        if stencil_type == 0:
             return tile_y, tile_x
         if stencil_type == 1:
             return 2 * tile_y, 2 * tile_x
@@ -46,15 +46,15 @@ def get_num_halo_points(stencil_type, tile_x, tile_y, compute_type):
         if stencil_type == 3:
             return tile_y + 1, 2 * tile_x
     else:
-        if stencil_type == 0: 
+        if stencil_type == 0:
             return tile_y, tile_x, tile_y, tile_x
-        if stencil_type == 1: 
+        if stencil_type == 1:
             return 2 * tile_y, 2 * tile_x, 2 * tile_y, 2 * tile_x
         if stencil_type == 2:
             return tile_y + 1, tile_x, tile_y + 1, tile_x
         if stencil_type == 3:
             return tile_y + 1, tile_x + 1, tile_y + 1, tile_x + 1
-    
+
 def get_num_stencil_points(dim, stencil_type, compute_type):
     if compute_type == "sptrsv":
         return len(get_affine_stencil_points(dim, stencil_type))
@@ -75,7 +75,7 @@ def get_stencil_points(dim, stencil_type):
         elif dim == 3:
             stencil_points = [
                 (0, 0, 1),
-                
+
                 (0, -1, 0),
                 (-1, 0, 0),
                 (0, 0, 0),
@@ -133,7 +133,7 @@ def get_stencil_points(dim, stencil_type):
                 (-1, 0, 1),
                 (0, -1, 1),
                 (0, 0, 1),
-                
+
                 (-1, 0, 0),
                 (0, -1, 0),
                 (-1, 1, 0),
@@ -194,7 +194,7 @@ def get_stencil_points(dim, stencil_type):
             ]
     return stencil_points
 
-# 经过仿射变换后的stencil相对偏移
+# Relative offsets of the stencil after affine transformation
 def get_affine_stencil_points(dim, stencil_type):
     if stencil_type == 0:
         # 3D-Star-7P/2D-Star-5P

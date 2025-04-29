@@ -1,24 +1,24 @@
 import numpy as np
 import math
 import random
-from mask_const import *
-from stencil import get_id2stage, get_stages, get_num_halo_points, get_stencil_points
+from .mask_const import *
+from .stencil import get_id2stage, get_stages, get_num_halo_points, get_stencil_points
 
 def preprocess_spmv(data, tile_x, tile_y, stencil_type, dims):
     matrix_value, A_valid = preprocessPGC_spmv(data["size"], data['A'], tile_x, tile_y, stencil_type, dims)
     result = np.zeros(data["size"])
 
     x, b, vec_index = preprocess_domain_data_spmv(data, tile_x, tile_y)
-    
+
     halo_x, halo_y, halo_x_inv, halo_y_inv, b_valid = preprocess_halo_data_spmv(data, tile_x, tile_y, stencil_type, dims)
 
     processed_data = {
-        "size": data["size"], "A": matrix_value, "A_valid": A_valid, 
-        "b": b, "b_valid": b_valid, 
+        "size": data["size"], "A": matrix_value, "A_valid": A_valid,
+        "b": b, "b_valid": b_valid,
         "x": x, "ijk": vec_index,
         "halo_x": halo_x, "halo_y": halo_y, "halo_x_inv": halo_x_inv, "halo_y_inv": halo_y_inv,
         "result": result, "gt": data["gt"]
-    }     
+    }
     return processed_data
 
 def preprocessPGC_spmv(size, data_A, tile_x, tile_y, stencil_type, dims):
@@ -69,7 +69,7 @@ def preprocess_halo_data_spmv(data, tile_x, tile_y, stencil_type, dims):
     halo_y = np.zeros((num_tiles * z, padd_y), dtype=object)
     halo_x_inv = np.zeros((num_tiles * z, padd_x_inv), dtype=object)
     halo_y_inv = np.zeros((num_tiles * z, padd_y_inv), dtype=object)
-    
+
     # check the update status of b
     b_valid = np.full(dim_shape, CUR_M, dtype=np.int16)
 
@@ -107,7 +107,7 @@ def preprocess_halo_data_spmv(data, tile_x, tile_y, stencil_type, dims):
                         halo_y[dim_0][p] = (halo_dim_0, p % tile_x, 0)
                         if halo_dim_0 >= 0:
                             b_valid[halo_y[dim_0][p]] |= OUT_J_M # out_j
-                    
+
                     # HEU_X_INV
                     for p in range(padd_x_inv):
                         halo_tile_x = out_i - 1
@@ -122,7 +122,7 @@ def preprocess_halo_data_spmv(data, tile_x, tile_y, stencil_type, dims):
                         halo_x_inv[dim_0][p] = (halo_dim_0, tile_x - 1, p % tile_y)
                         if halo_dim_0 >= 0:
                             b_valid[halo_x_inv[dim_0][p]] |= OUT_I_INV_M # out_i_inv
-                    
+
                     # HEU_Y_INV
                     for p in range(padd_y_inv):
                         halo_tile_x = out_i
@@ -139,7 +139,7 @@ def preprocess_halo_data_spmv(data, tile_x, tile_y, stencil_type, dims):
                             b_valid[halo_y_inv[dim_0][p]] |= OUT_J_INV_M # out_j_inv
 
                 elif stencil_type == 1: # Star13P
-                    # in和agg交替映射 halo_x[0]->in, halo_x[1]->agg, ...
+                    # Map alternately between "in" and "agg", halo_x[0] -> in, halo_x[1] -> agg, ...
                     # padd_x = padd_y = 2 * base
                     for p in range(padd_x):
                         dx = tile_x if p % 2 == 0 else tile_x + 1
@@ -298,7 +298,7 @@ def preprocess_halo_data_spmv(data, tile_x, tile_y, stencil_type, dims):
                             b_valid[halo_y_inv[dim_0][p]] |= OUT_J_INV_M # out_j_inv
 
                 elif stencil_type == 3: # Box27P
-                    # in和agg交替映射 halo_y[0]->in, halo_y[1]->agg, ...
+                    # Map alternately between "in" and "agg", halo_y[0] -> in, halo_y[1] -> agg, ...
                     # padd_x = base + 1, padd_y = 2 * base
                     for p in range(padd_x):
                         dx = tile_x
@@ -339,7 +339,7 @@ def preprocess_halo_data_spmv(data, tile_x, tile_y, stencil_type, dims):
                                 b_valid[halo_y[dim_0][p]] |= OUT_J_M # out_j
                             if p != 0:
                                 b_valid[halo_y[dim_0][p]] |= AGG_J_M # agg_j
-                    
+
                     for p in range(padd_x_inv):
                         dx = -1
                         dy = p
@@ -353,13 +353,13 @@ def preprocess_halo_data_spmv(data, tile_x, tile_y, stencil_type, dims):
                         else:
                             halo_dim_0 = -1
                         halo_x_inv[dim_0][p] = (halo_dim_0, dx % tile_x, dy % tile_y)
-                        
+
                         if halo_dim_0 >= 0:
                             if p != tile_y:
                                 b_valid[halo_x_inv[dim_0][p]] |= OUT_I_INV_M # out_i_inv
                             if p != 0:
                                 b_valid[halo_x_inv[dim_0][p]] |= AGG_I_INV_M # agg_i_inv
-                    
+
                     for p in range(padd_y_inv):
                         dx = p - 1
                         dy = -1
@@ -373,7 +373,7 @@ def preprocess_halo_data_spmv(data, tile_x, tile_y, stencil_type, dims):
                         else:
                             halo_dim_0 = -1
                         halo_y_inv[dim_0][p] = (halo_dim_0, dx % tile_x, dy % tile_y)
-                        
+
                         if halo_dim_0 >= 0:
                             if p != 0:
                                 b_valid[halo_y_inv[dim_0][p]] |= OUT_J_INV_M # out_j_inv

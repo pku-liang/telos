@@ -1,7 +1,7 @@
 import numpy as np
 import math
-from mask_const import *
-from stencil import get_id2stage, get_stages, get_num_halo_points
+from .mask_const import *
+from .stencil import get_id2stage, get_stages, get_num_halo_points
 
 def preprocess_sptrsv(data, tile_x, tile_y, stencil_type, dims, schedule_scheme):
     # A_valid is a flag to indicate when the pipeline should insert a bubble
@@ -26,7 +26,7 @@ def preprocess_sptrsv(data, tile_x, tile_y, stencil_type, dims, schedule_scheme)
 
 def calc_bubbles(stages, diag_len):
     return stages - 1
-    # 最多插入stage - 1个bubble
+    # Insert at most stage - 1 bubbles
     # return max(0, min(stages - 1, stages + 20 - diag_len))
 
 def get_bubbles(num_tile_x, num_tile_y, stages, schedule_scheme):
@@ -162,7 +162,7 @@ def preprocess_halo_data_sptrsv(data, tile_x, tile_y, stencil_type, dims, sche_s
                         b_valid[halo_y[dim_0][p]] |= OUT_J_M # out_j
 
             elif stencil_type == 1: # Star13P
-                # in和agg交替映射 halo_x[0]->in, halo_x[1]->agg, ...
+                # in and agg alternate mapping halo_x[0]->in, halo_x[1]->agg, ...
                 # padd_x = padd_y = 2 * base
                 for p in range(padd_x):
                     halo_tile_x = out_i + 1
@@ -302,5 +302,3 @@ def preprocess_domain_data_sptrsv(data, tile_x, tile_y, sche_seq):
                     vec_index[dim_0][in_i][in_j] = (total_i, total_j, k)
         tile_idx += 1
     return matrix_diag, right_hand_side, vec_index
-
-

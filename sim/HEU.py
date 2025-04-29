@@ -1,7 +1,7 @@
 import math
-from PreprocessSpMV import get_num_halo_points
 from loguru import logger
-from mask_const import *
+from .PreprocessSpMV import get_num_halo_points
+from .mask_const import *
 
 class HEU:
     def __init__(self, env, cfg, bufs, data, bd_ports, position):
@@ -171,7 +171,7 @@ class HEU:
             else:
                 new_b = b_val + (out + agg_out)
 
-            # 对于index[0] < 0的无效值，需要先取走agg & in端口值，避免阻塞，输出可以直接丢弃
+            # For invalid values where index[0] < 0, agg & in port values need to be fetched first to avoid blocking, and the output can be discarded directly.
             if b_idx[0] < 0:
                 logger.trace(f"(Cycle {self.env.now}) HEU ({self.position}, {i}) ignore the invalid b_idx={b_idx}")
                 continue

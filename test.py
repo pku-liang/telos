@@ -1,7 +1,7 @@
 import sys
-from Accelerator import *
 from loguru import logger
 from concurrent.futures import ProcessPoolExecutor, as_completed
+from sim.Accelerator import *
 from main import run_sim, read_config
 
 def test_multithread(compute_type, size_list, stencil_list, max_threads):

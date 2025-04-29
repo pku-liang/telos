@@ -10,7 +10,7 @@ OUT_J_INV_M = 0b10000000
 
 CUR_M = 0b100000000
 
-# 求mask的前缀或
+# Calculate the prefix OR of the masks
 def gen_mask(mask_list):
     val = 0
     out_list = []

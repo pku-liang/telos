@@ -3,6 +3,8 @@
     "NumDims": 2,
     "Freq": 0.4,
     "ScheScheme": "wavefront",
+    "ComputeType": "sptrsv",
+    "DataWidth": 4,
     "Arch": {
         "NumPEs": [8, 8],
         "VecLanes": 4,

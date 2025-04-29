@@ -1,10 +1,10 @@
 import sys, json, time, os
-from MtxGen import get_linear_system_sptrsv, get_linear_system_spmv
-from PreprocessSpTRSV import preprocess_sptrsv
-from PreprocessSpMV import preprocess_spmv
-from Accelerator import *
 from loguru import logger
 from concurrent.futures import ProcessPoolExecutor, as_completed
+from sim.matrix_gen import get_linear_system_sptrsv, get_linear_system_spmv
+from sim.PreprocessSpTRSV import preprocess_sptrsv
+from sim.PreprocessSpMV import preprocess_spmv
+from sim.Accelerator import *
 from main import read_config, set_allocate_DRAM_BW
 
 stencil_str_2d = ["2D-Star-5P", "2D-Star-9P", "2D-Diamond-7P", "2D-Box-9P"]
@@ -19,7 +19,7 @@ def get_stencil_str(dims, stencil_type):
 def sim_task(size, config):
     dims = len(size)
     stencil_type = config["StencilType"]
-    print(f"current size: {size}, stencil type: {stencil_type}, PE size: {config["Arch"]["NumPEs"]}, DRAM BW: {config["Mem"]["DRAM_BW"]}GB/s")
+    print(f"current size: {size}, stencil type: {stencil_type}, PE size: {config['Arch']['NumPEs']}, DRAM BW: {config['Mem']['DRAM_BW']}GB/s")
 
     start_time = time.time()
     if config["ComputeType"] == "spmv":
@@ -119,7 +119,7 @@ def run_scalability_DRAM_BW_PE(size_list, pe_size_list, dram_bw_list, max_thread
                 stencil_type = config["StencilType"]
                 dram_bw = config["Mem"]["DRAM_BW"]
                 csv_file.write(
-                    f"{dram_bw}, {config["Arch"]["NumPEs"][0]}, {info.summ.cycles},\
+                    f"{dram_bw}, {config['Arch']['NumPEs'][0]}, {info.summ.cycles},\
                     {info.dram.total_bw:.2f}, {info.summ.pe_util:.2f}%\n"
                 )
                 csv_file.flush()
@@ -148,7 +148,7 @@ def run_scalability_Veclane(size_list, vec_lane_list, max_threads):
                 stencil_type = config["StencilType"]
                 csv_file.write(
                     f"{size[0]}, {get_stencil_str(dims, stencil_type)},\
-                    {config["Arch"]["VecLanes"]}, {info.summ.cycles},\
+                    {config['Arch']['VecLanes']}, {info.summ.cycles},\
                     {info.summ.pe_util:.2f}%\n"
                 )
                 csv_file.flush()
@@ -264,7 +264,7 @@ def run_sche_comp(size_list, stencil_list, csv_path, max_threads):
                 info: Info = task.result()
                 stencil_type = config["StencilType"]
                 csv_file.write(
-                    f"\"{size}\", {stencil_type}, {config["ScheScheme"]}, {info.summ.cycles}, {info.summ.pe_util:.2f}%\n"
+                    f"\"{size}\", {stencil_type}, {config['ScheScheme']}, {info.summ.cycles}, {info.summ.pe_util:.2f}%\n"
                 )
 
 def run_spmv_sim(size_list, stencil_list, csv_path, max_threads):
@@ -278,7 +278,6 @@ def run_spmv_sim(size_list, stencil_list, csv_path, max_threads):
                 config["ScheScheme"] = "default"
                 config["NumDims"] = dims
                 config["StencilType"] = stencil_type
-                config["DataSize"] = 4
                 set_allocate_DRAM_BW(config)
                 tasks[executor.submit(sim_task, size, config)] = (size, config)
 
@@ -371,4 +370,3 @@ if __name__ == "__main__":
             (1024, 1024), (2048, 2048), (3072, 3072), (4096, 4096)
         ]
         run_sche_comp(size_list, [3], csv_path, max_procs)
-
