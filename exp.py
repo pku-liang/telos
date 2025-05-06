@@ -300,7 +300,7 @@ def run_spmv_sim(size_list, stencil_list, csv_path, max_threads):
 if __name__ == "__main__":
     logger.remove()
     if len(sys.argv) != 4:
-        print("Usage: python exp.py [csv_path] [exp_type] [max_threads]")
+        print("Usage: python exp.py [csv_path] [exp_type] [max_procs]")
     csv_path = sys.argv[1]
     exp_type = sys.argv[2]
     max_procs = int(sys.argv[3])

@@ -129,7 +129,7 @@ def run_sim(config, size, test_flag):
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("Usage: python main.py <config_file> x y z [debug_flag]")
+        print("Usage: python main.py [config_file] [size] [debug_flag]")
         sys.exit(1)
 
     config_file = sys.argv[1]
